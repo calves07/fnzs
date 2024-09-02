@@ -18,11 +18,11 @@
 
     <repositories>
         <repository>
-            <id>github</id>
+            <id>github-yunite4j</id>
             <url>https://maven.pkg.github.com/calves07/yunite4j</url>
         </repository>
         <repository>
-            <id>github</id>
+            <id>github-fortnite-v3</id>
             <url>https://maven.pkg.github.com/calves07/fortnite-v3</url>
         </repository>
     </repositories>
