@@ -76,7 +76,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.16</version>
                 <configuration>
-                    <mainClass>calves.MyApplication</mainClass> <!-- Specify your main class here -->
+                    <mainClass>org.calves.fnzs.FnzsApplication</mainClass> <!-- Specify your main class here -->
                     <layout>JAR</layout>
                     <excludes>
                         <exclude>
