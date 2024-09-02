@@ -21,6 +21,10 @@ public class FnzsController {
     private static final YuniteApi API = new YuniteApi(new ApiConfig(System.getenv("YUNITE_API_KEY")));
     private static final Logger LOGGER = LogManager.getLogger(FnzsController.class);
 
+    public static int getKeyLength(){
+        return System.getenv("YUNITE_API_KEY").length();
+    }
+
     public static void getLeaderboard(String guildId, String tournamentId) {
 
         Tournament tournament = API.getTournament(guildId, tournamentId);

@@ -13,6 +13,11 @@ public class RestController {
         return "Hello world";
     }
 
+    @GetMapping("/key")
+    public int key() {
+        return FnzsController.getKeyLength();
+    }
+
     @GetMapping("/{guildId}/leaderboard/{tournamentId}/individual")
     public String getIndividualLeaderboard(@PathVariable String guildId, @PathVariable String tournamentId) {
         FnzsController.getLeaderboard(guildId, tournamentId);
