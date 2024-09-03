@@ -22,10 +22,12 @@ public class FnzsController {
     private static final String DEFAULT_GUILD_ID = "1213253795333541960";
 
     public static List<Tournament> getTournaments() {
+        LOGGER.info("Retrieving tournaments");
         return API.getTournaments(DEFAULT_GUILD_ID);
     }
 
     public static Tournament getTournament(String guildId, String tournamentId) {
+        LOGGER.info("Retrieving tournament {} from guild {}", tournamentId, DEFAULT_GUILD_ID);
         try {
             return API.getTournament(DEFAULT_GUILD_ID, tournamentId);
         } catch (Exception ex) {
@@ -35,13 +37,18 @@ public class FnzsController {
 
     public static List<Team> getTournamentLeaderboard(Tournament tournament) {
 
+        LOGGER.info("Retrieving leaderboard from tournament {}", tournament.getId());
         List<Team> teams = API.getTournamentLeaderboard(DEFAULT_GUILD_ID, tournament.getId());
+        LOGGER.debug("Retrieved a total of {} teams", teams.size());
 
         // todo: fix missing names
         // First we enrich data with Epic usernames
+
+        LOGGER.debug("Enriching data Epic usernames");
         for (Team team : teams) {
             for (Team.User user : team.getUsers()) {
                 if (user.getEpicUsername() == null) {
+                    LOGGER.debug("Trying to enrich username for account {}", user.getEpicId());
                     try {
                         user.setEpicUsername(AccountsController.getUsernameFromAccountId(user.getEpicId()));
                     } catch (Exception ex) {
@@ -53,9 +60,11 @@ public class FnzsController {
 
         // Then we split team members (while merging member data to make sure the totals and averages are still correct)
         List<Team> resultingTeams = splitAndMergeTeams(teams);
+        LOGGER.debug("Finished splitting and merging leaderboard for individual rankings");
 
         // Then we sort team members by score and set placements accordingly
         sortAndSetPlacement(resultingTeams);
+        LOGGER.debug("Finished sorting leaderboard");
 
         return resultingTeams;
 
@@ -69,6 +78,7 @@ public class FnzsController {
             for (Team.User user : team.getUsers()) {
                 Team existingTeam = findTeamByUser(individualTeams, user);
 
+                // todo: update counted kills, wins, etc
                 if (existingTeam != null) {
                     // Sum the relevant fields
                     existingTeam.setKills(existingTeam.getKills() + team.getKills());
@@ -125,6 +135,8 @@ public class FnzsController {
         return null;
     }
 
+
+    // todo: apply tie breakers
     private static void sortAndSetPlacement(List<Team> teams) {
         // Sort teams by score in descending order
         teams.sort(Comparator.comparingInt(Team::getScore).reversed());
