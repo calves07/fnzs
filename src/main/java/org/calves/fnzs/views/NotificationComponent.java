@@ -16,11 +16,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 public class NotificationComponent {
 
     public NotificationComponent(NotificationVariant variant, String message) {
+
         Notification notification = new Notification();
         notification.addThemeVariants(variant);
 
         Div text = new Div(new Text(message));
-
         Button closeButton = new Button(new Icon("lumo", "cross"));
         closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         closeButton.setAriaLabel("Close");
@@ -33,5 +33,6 @@ public class NotificationComponent {
 
         notification.add(layout);
         notification.open();
+
     }
 }

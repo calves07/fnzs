@@ -17,7 +17,7 @@ public class WelcomeView extends VerticalLayout {
 
     public WelcomeView() {
 
-        H1 welcomeMessage = new H1("Welcome to My Application!");
+        H1 welcomeMessage = new H1("Welcome!");
         add(welcomeMessage);
 
         List<Tournament> tournaments = FnzsController.getTournaments();

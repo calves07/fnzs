@@ -21,10 +21,6 @@ public class FnzsController {
     private static final Logger LOGGER = LogManager.getLogger(FnzsController.class);
     private static final String DEFAULT_GUILD_ID = "1213253795333541960";
 
-    public static int getKeyLength() {
-        return System.getenv("YUNITE_API_KEY").length();
-    }
-
     public static List<Tournament> getTournaments() {
         return API.getTournaments(DEFAULT_GUILD_ID);
     }
@@ -41,6 +37,7 @@ public class FnzsController {
 
         List<Team> teams = API.getTournamentLeaderboard(DEFAULT_GUILD_ID, tournament.getId());
 
+        // todo: fix missing names
         // First we enrich data with Epic usernames
         for (Team team : teams) {
             for (Team.User user : team.getUsers()) {
