@@ -1,14 +1,22 @@
 package org.calves.fnzs.controller;
 
+import api.EpicGamesApi;
 import controller.AccountsController;
+import controller.MongoDbController;
+import dto.canonical.Account;
+import dto.epicgames.SearchAccountsResponse;
+import exception.AccountNotFoundException;
+import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.calves.yunite4j.YuniteApi;
 import org.calves.yunite4j.dto.ApiConfig;
 import org.calves.yunite4j.dto.Team;
 import org.calves.yunite4j.dto.Tournament;
+import utils.DeserializationUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -50,7 +58,7 @@ public class FnzsController {
                 if (user.getEpicUsername() == null) {
                     LOGGER.debug("Trying to enrich username for account {}", user.getEpicId());
                     try {
-                        user.setEpicUsername(AccountsController.getUsernameFromAccountId(user.getEpicId()));
+                        user.setEpicUsername(lolgetUsernameFromAccountId(user.getEpicId()));
                         if (user.getEpicUsername() == null || user.getEpicUsername().isBlank()) {
                             LOGGER.warn("Username for {} is NULL or BLANK: ", user.getEpicId(), user.getEpicUsername());
                             user.setEpicUsername(String.format("Unknown(%s)", user.getEpicId()));
@@ -73,6 +81,25 @@ public class FnzsController {
         return resultingTeams;
 
         // DiscordNotificationUtils.logRanking(tournament, resultingTeams);
+    }
+
+    public static String lolgetUsernameFromAccountId(String accountId) throws AccountNotFoundException {
+        Account account = MongoDbController.getAccount(accountId);
+        if (account != null && account.getUsername() != null && !account.getUsername().isEmpty()) {
+            LOGGER.info("Account from database already contains a username, returning that");
+            return account.getUsername();
+        } else {
+            LOGGER.info("Looking for username for {} in Epic Games API", accountId);
+            Response response = EpicGamesApi.getDisplayNames(Collections.singletonList(accountId));
+            ArrayList<SearchAccountsResponse> searchAccountsResponse = DeserializationUtils.convertResponseToList(response, SearchAccountsResponse.class);
+            LOGGER.info("Response contains {} results", searchAccountsResponse.size());
+            if (searchAccountsResponse.size() > 1) {
+                LOGGER.error("Found more than one account with ID {} on Epic Games API", accountId);
+            } else if (searchAccountsResponse.isEmpty()) {
+                throw new AccountNotFoundException();
+            }
+            return searchAccountsResponse.getFirst().findName();
+        }
     }
 
     public static List<Team> splitAndMergeTeams(List<Team> teams) {
