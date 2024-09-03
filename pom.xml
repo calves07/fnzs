@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Do not upgrade lo4j as that will cause errors in Heroku -->
         <log4j.version>2.23.1</log4j.version>
-        <vaadin.version>24.4.11</vaadin.version>
+        <vaadin.version>24.4.10</vaadin.version>
     </properties>
 
     <repositories>
