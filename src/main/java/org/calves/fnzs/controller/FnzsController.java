@@ -3,7 +3,6 @@ package org.calves.fnzs.controller;
 import controller.AccountsController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.calves.fnzs.DiscordNotificationUtils;
 import org.calves.yunite4j.YuniteApi;
 import org.calves.yunite4j.dto.ApiConfig;
 import org.calves.yunite4j.dto.Team;
@@ -20,15 +19,27 @@ public class FnzsController {
 
     private static final YuniteApi API = new YuniteApi(new ApiConfig(System.getenv("YUNITE_API_KEY")));
     private static final Logger LOGGER = LogManager.getLogger(FnzsController.class);
+    private static final String DEFAULT_GUILD_ID = "1213253795333541960";
 
-    public static int getKeyLength(){
+    public static int getKeyLength() {
         return System.getenv("YUNITE_API_KEY").length();
     }
 
-    public static void getLeaderboard(String guildId, String tournamentId) {
+    public static List<Tournament> getTournaments() {
+        return API.getTournaments(DEFAULT_GUILD_ID);
+    }
 
-        Tournament tournament = API.getTournament(guildId, tournamentId);
-        List<Team> teams = API.getTournamentLeaderboard(guildId, tournamentId);
+    public static Tournament getTournament(String guildId, String tournamentId) {
+        try {
+            return API.getTournament(DEFAULT_GUILD_ID, tournamentId);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    public static List<Team> getTournamentLeaderboard(Tournament tournament) {
+
+        List<Team> teams = API.getTournamentLeaderboard(DEFAULT_GUILD_ID, tournament.getId());
 
         // First we enrich data with Epic usernames
         for (Team team : teams) {
@@ -49,7 +60,9 @@ public class FnzsController {
         // Then we sort team members by score and set placements accordingly
         sortAndSetPlacement(resultingTeams);
 
-        DiscordNotificationUtils.logRanking(tournament, resultingTeams);
+        return resultingTeams;
+
+        // DiscordNotificationUtils.logRanking(tournament, resultingTeams);
     }
 
     public static List<Team> splitAndMergeTeams(List<Team> teams) {
@@ -72,8 +85,7 @@ public class FnzsController {
                     existingTeam.setScore(existingTeam.getScore() + team.getScore());
                     existingTeam.setSumSecondsSurvived(existingTeam.getSumSecondsSurvived() + team.getSumSecondsSurvived());
                     // Recalculate averages
-                    // todo: fix
-                    existingTeam.setAveragePlacement(existingTeam.getPlacement() / existingTeam.getGames());
+                    existingTeam.setAveragePlacement(calculateAveragePlacement(existingTeam.getGameList()));
                     existingTeam.setAverageSecondsSurvived(existingTeam.getSumSecondsSurvived() / existingTeam.getGames());
                     existingTeam.setKpm(existingTeam.getKills() / existingTeam.getSumSecondsSurvived()); // Kills per minute
                     // Merge gameList and corrections
@@ -94,7 +106,7 @@ public class FnzsController {
                     newTeam.setEliminationScore(team.getEliminationScore());
                     newTeam.setScore(team.getScore());
                     newTeam.setSumSecondsSurvived(team.getSumSecondsSurvived());
-                    newTeam.setAveragePlacement(team.getPlacement() / team.getGames());
+                    newTeam.setAveragePlacement(calculateAveragePlacement(team.getGameList()));
                     newTeam.setAverageSecondsSurvived(team.getSumSecondsSurvived() / team.getGames());
                     newTeam.setKpm(team.getKills() / team.getSumSecondsSurvived());
                     newTeam.setGameList(new ArrayList<>(team.getGameList()));  // Copy gameList
@@ -133,5 +145,10 @@ public class FnzsController {
             // Increment the placement counter only when moving to the next unique rank
             currentPlacement++;
         }
+    }
+
+    private static double calculateAveragePlacement(List<Team.Game> games) {
+        // todo: take all games into consideration or only the ones that count?
+        return games.stream().mapToDouble(Team.Game::getPlacement).sum() / games.size();
     }
 }
