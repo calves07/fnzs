@@ -39,12 +39,12 @@ public class FnzsController {
 
         LOGGER.info("Retrieving leaderboard from tournament {}", tournament.getId());
         List<Team> teams = API.getTournamentLeaderboard(DEFAULT_GUILD_ID, tournament.getId());
-        LOGGER.debug("Retrieved a total of {} teams", teams.size());
+        LOGGER.info("Retrieved a total of {} teams", teams.size());
 
         // todo: fix missing names
         // First we enrich data with Epic usernames
 
-        LOGGER.debug("Enriching data Epic usernames");
+        LOGGER.info("Enriching data Epic usernames");
         for (Team team : teams) {
             for (Team.User user : team.getUsers()) {
                 if (user.getEpicUsername() == null) {
