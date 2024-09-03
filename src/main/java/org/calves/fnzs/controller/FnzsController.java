@@ -51,6 +51,9 @@ public class FnzsController {
                     LOGGER.debug("Trying to enrich username for account {}", user.getEpicId());
                     try {
                         user.setEpicUsername(AccountsController.getUsernameFromAccountId(user.getEpicId()));
+                        if (user.getEpicUsername() == null || user.getEpicUsername().isBlank()) {
+                            LOGGER.warn("Username for {} is NULL or BLANK: ", user.getEpicId(), user.getEpicUsername());
+                        }
                     } catch (Exception ex) {
                         LOGGER.warn("Failed to update username for {}", user.getEpicId(), ex);
                     }
