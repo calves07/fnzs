@@ -53,6 +53,7 @@ public class FnzsController {
                         user.setEpicUsername(AccountsController.getUsernameFromAccountId(user.getEpicId()));
                         if (user.getEpicUsername() == null || user.getEpicUsername().isBlank()) {
                             LOGGER.warn("Username for {} is NULL or BLANK: ", user.getEpicId(), user.getEpicUsername());
+                            user.setEpicUsername(String.format("Unknown(%s)", user.getEpicId()));
                         }
                     } catch (Exception ex) {
                         LOGGER.warn("Failed to update username for {}", user.getEpicId(), ex);
