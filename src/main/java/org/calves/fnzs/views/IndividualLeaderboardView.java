@@ -122,7 +122,7 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
             eliminationScoreField.setValue(String.format("%d (%.1f%%)", team.getEliminationScore(), (double) team.getEliminationScore() / team.getScore() * 100));
             epicIdField.setValue(team.getUsers().getFirst().getEpicId());
             discordIdField.setValue(team.getUsers().getFirst().getDiscordId());
-    
+
             // Clear existing matches from the layout
             matches.removeAll();
 
@@ -156,8 +156,7 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
                 killsField.setMaxWidth(50, Unit.PIXELS);
 
                 TextField placementField = new TextField("Placement");
-                // todo: fix to display number of teams instead of players
-                placementField.setValue(String.format("%d/%d", game.getPlacement(), game.getSession().getPlayers()));
+                placementField.setValue(String.format("%d/%d", game.getPlacement(), FnzsController.getTeamsInMatch(game.getSessionId())));
                 placementField.setReadOnly(true);
                 placementField.setMaxWidth(83, Unit.PIXELS);
 

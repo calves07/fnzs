@@ -8,12 +8,14 @@ import org.apache.logging.log4j.Logger;
 import org.calves.yunite4j.YuniteApi;
 import org.calves.yunite4j.dto.ApiConfig;
 import org.calves.yunite4j.dto.MatchSession;
+import org.calves.yunite4j.dto.SessionLeaderboard;
 import org.calves.yunite4j.dto.Team;
 import org.calves.yunite4j.dto.Tournament;
 import org.calves.yunite4j.utils.DeserializationUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -24,6 +26,7 @@ public class FnzsController {
     private static final YuniteApi API = new YuniteApi(new ApiConfig(System.getenv("YUNITE_API_KEY")));
     private static final Logger LOGGER = LogManager.getLogger(FnzsController.class);
     private static final String DEFAULT_GUILD_ID = "1213253795333541960";
+    private static final HashMap<String, List<SessionLeaderboard>> SESSIONS_LEADERBOARD = new HashMap<>();
 
     public static List<Tournament> getTournaments() {
         LOGGER.info("Retrieving tournaments");
@@ -63,7 +66,7 @@ public class FnzsController {
         }
 
         // Then we enrich games data
-        enrichTournamentMatches(tournament.getPointSystem(), API.getTournamentMatches(DEFAULT_GUILD_ID, tournament.getId()), teams);
+        enrichTournamentMatches(tournament, API.getTournamentMatches(DEFAULT_GUILD_ID, tournament.getId()), teams);
 
         // Then we split team members (while merging member data to make sure the totals and averages are still correct)
         List<Team> resultingTeams = splitAndMergeTeams(teams);
@@ -77,7 +80,16 @@ public class FnzsController {
         return resultingTeams;
     }
 
-    public static List<Team> splitAndMergeTeams(List<Team> teams) {
+    public static int getTeamsInMatch(String sessionId) {
+        try {
+            return SESSIONS_LEADERBOARD.get(sessionId).size();
+        } catch (Exception ex) {
+            LOGGER.error("No session leaderboard for match {}", sessionId);
+            return -1;
+        }
+    }
+
+    private static List<Team> splitAndMergeTeams(List<Team> teams) {
         List<Team> individualTeams = new ArrayList<>();
         for (Team team : teams) {
             for (Team.User user : team.getUsers()) {
@@ -182,11 +194,14 @@ public class FnzsController {
         return games.stream().mapToDouble(Team.Game::getPlacement).sum() / games.size();
     }
 
-    private static void enrichTournamentMatches(Tournament.PointSystem pointSystem, List<MatchSession> matches, List<Team> teams) {
+    private static void enrichTournamentMatches(Tournament tournament, List<MatchSession> matches, List<Team> teams) {
         for (Team team : teams) {
             for (Team.Game game : team.getGameList()) {
                 game.setSession(matches.stream().filter(x -> x.getSessionId().equals(game.getSessionId())).findFirst().get());
-                enrichMatchScore(pointSystem, game);
+                enrichMatchScore(tournament.getPointSystem(), game);
+                if (!SESSIONS_LEADERBOARD.containsKey(game.getSessionId())) {
+                    SESSIONS_LEADERBOARD.put(game.getSessionId(), API.getMatchLeaderboard(DEFAULT_GUILD_ID, tournament.getId(), game.getSessionId()));
+                }
             }
         }
     }
@@ -204,8 +219,7 @@ public class FnzsController {
         game.setPlacementScore(placementScore);
         game.setScore(eliminationScore + placementScore);
         if (initialScore != game.getScore()) {
-            // todo: check this
-            System.out.println("DIFFERENT SCORE!!!!" + (game.getScore() - initialScore));
+            LOGGER.error("Calculated score has a difference of {} compared to score from Yunite", game.getScore() - initialScore);
         }
     }
 }
