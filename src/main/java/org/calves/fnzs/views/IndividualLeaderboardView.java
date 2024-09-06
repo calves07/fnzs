@@ -1,10 +1,12 @@
 package org.calves.fnzs.views;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -16,6 +18,8 @@ import org.calves.yunite4j.dto.Team;
 import org.calves.yunite4j.dto.Tournament;
 import utils.MathUtils;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -25,6 +29,9 @@ import java.util.stream.Stream;
  */
 @Route("leaderboard/individual")
 public class IndividualLeaderboardView extends VerticalLayout implements HasUrlParameter<String> {
+
+    private static final ZoneId ZONE_ID = ZoneId.of("Europe/Lisbon");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH'h'mm");
 
     private Grid<Team> grid = new Grid<>(Team.class, false);
     private H1 tournamentTitle = new H1("Loading tournament data");
@@ -40,6 +47,7 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
         grid.addColumn(Team::getWins).setHeader("Wins");
         grid.addColumn(team -> MathUtils.roundToDecimalPlaces(team.getAveragePlacement(), 1)).setHeader("Average Placement");
         grid.addColumn(team -> MathUtils.roundToDecimalPlaces(team.getAverageSecondsSurvived() / 60, 1)).setHeader("Average Minutes Survived");
+
 
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
@@ -89,6 +97,7 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
         private final TextField countedGamesField = new TextField("Counted Games");
         private final TextField placementScoreField = new TextField("Placement Score");
         private final TextField eliminationScoreField = new TextField("Elimination Score");
+        private final VerticalLayout matches = new VerticalLayout();
 
         public TeamDetailsFormLayout() {
             Stream.of(countedKillsField, countedWinsField, countedGamesField, placementScoreField, eliminationScoreField).forEach(field -> {
@@ -96,11 +105,17 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
                 add(field);
             });
 
-            setResponsiveSteps(new ResponsiveStep("0", 5));
+            setResponsiveSteps(
+                    new ResponsiveStep("0", 1),  // On very small screens, stack fields vertically (1 column)
+                    new ResponsiveStep("600px", 2),  // On slightly larger screens, use 2 columns
+                    new ResponsiveStep("900px", 3),  // On medium screens, use 3 columns
+                    new ResponsiveStep("1200px", 5)  // On large screens, use 5 columns
+            );
             //  setColspan(emailField, 3);
             //  setColspan(phoneField, 3);
             //  setColspan(streetField, 3);
         }
+
 
         public void setTeam(Team team) {
             countedKillsField.setValue(Integer.toString(team.getCountedKills()));
@@ -108,6 +123,55 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
             countedGamesField.setValue(Integer.toString(team.getCountedGames()));
             placementScoreField.setValue(String.format("%d (%.1f%%)", team.getPlacementScore(), (double) team.getPlacementScore() / team.getScore() * 100));
             eliminationScoreField.setValue(String.format("%d (%.1f%%)", team.getEliminationScore(), (double) team.getEliminationScore() / team.getScore() * 100));
+
+            // Clear existing matches from the layout
+            matches.removeAll();
+
+            // Add each match to the layout
+            for (Team.Game game : team.getGameList()) {
+                HorizontalLayout gameLayout = new HorizontalLayout();
+
+                TextField gameIdField = new TextField("Match ID");
+                gameIdField.setValue(game.getSessionId());
+                gameIdField.setReadOnly(true);
+                gameIdField.setMinWidth(320, Unit.PIXELS);
+
+                TextField timestampField = new TextField("Timestamp");
+                timestampField.setValue(game.getTimestamp().atZone(ZONE_ID).format(DATE_TIME_FORMATTER));
+                timestampField.setReadOnly(true);
+                timestampField.setMaxWidth(158, Unit.PIXELS);
+
+                TextField gameScoreField = new TextField("Score");
+                gameScoreField.setValue(Integer.toString(game.getScore()));
+                gameScoreField.setReadOnly(true);
+                gameScoreField.setMaxWidth(50, Unit.PIXELS);
+
+                TextField countsField = new TextField("Counts?");
+                countsField.setValue(game.isCounts() ? "Yes ✅" : "No ❌");
+                countsField.setReadOnly(true);
+                countsField.setMaxWidth(75, Unit.PIXELS);
+
+                TextField killsField = new TextField("Kills");
+                killsField.setValue(Integer.toString(game.getKills()));
+                killsField.setReadOnly(true);
+                killsField.setMaxWidth(50, Unit.PIXELS);
+
+                TextField placementField = new TextField("Placement");
+                placementField.setValue(String.format("%d/%d", game.getPlacement(), game.getSession().getPlayers()));
+                placementField.setReadOnly(true);
+                placementField.setMaxWidth(83, Unit.PIXELS);
+
+                // Add all fields to the game's horizontal layout
+                gameLayout.add(gameIdField, timestampField, gameScoreField, countsField, killsField, placementField);
+
+                // Add the game layout to the matches layout
+                matches.add(gameLayout);
+            }
+
+            // Add the matches layout to the form layout if not already added
+            if (!this.getChildren().anyMatch(component -> component.equals(matches))) {
+                add(matches);
+            }
         }
     }
 }
