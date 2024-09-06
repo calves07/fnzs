@@ -83,7 +83,6 @@ public class FnzsController {
         for (Team team : teams) {
             for (Team.User user : team.getUsers()) {
                 Team existingTeam = findTeamByUser(individualTeams, user);
-
                 if (existingTeam != null) {
                     // Sum the relevant fields
                     existingTeam.setKills(existingTeam.getKills() + team.getKills());
@@ -93,7 +92,7 @@ public class FnzsController {
                     // Recalculate averages
                     existingTeam.setAveragePlacement(calculateAveragePlacement(existingTeam.getGameList()));
                     existingTeam.setAverageSecondsSurvived(existingTeam.getSumSecondsSurvived() / existingTeam.getGames());
-                    existingTeam.setKpm(existingTeam.getKills() / existingTeam.getSumSecondsSurvived());
+                    existingTeam.setKpm(existingTeam.getKills() / existingTeam.getSumSecondsSurvived() * 60);
                     // Merge gameList and corrections
                     existingTeam.getGameList().addAll(team.getGameList());
                     existingTeam.getCorrections().addAll(team.getCorrections());
