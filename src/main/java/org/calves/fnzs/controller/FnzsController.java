@@ -87,42 +87,25 @@ public class FnzsController {
                 if (existingTeam != null) {
                     // Sum the relevant fields
                     existingTeam.setKills(existingTeam.getKills() + team.getKills());
-                    // existingTeam.setCountedKills(existingTeam.getCountedKills() + team.getCountedKills());
                     existingTeam.setGames(existingTeam.getGames() + team.getGames());
-                    // existingTeam.setCountedGames(existingTeam.getCountedGames() + team.getCountedGames());
                     existingTeam.setWins(existingTeam.getWins() + team.getWins());
-                    // existingTeam.setCountedWins(existingTeam.getCountedWins() + team.getCountedWins());
-                    // existingTeam.setPlacementScore(existingTeam.getPlacementScore() + team.getPlacementScore());
-                    // existingTeam.setEliminationScore(existingTeam.getEliminationScore() + team.getEliminationScore());
-                    // existingTeam.setScore(existingTeam.getScore() + team.getScore());
                     existingTeam.setSumSecondsSurvived(existingTeam.getSumSecondsSurvived() + team.getSumSecondsSurvived());
                     // Recalculate averages
                     existingTeam.setAveragePlacement(calculateAveragePlacement(existingTeam.getGameList()));
                     existingTeam.setAverageSecondsSurvived(existingTeam.getSumSecondsSurvived() / existingTeam.getGames());
-                    existingTeam.setKpm(existingTeam.getKills() / existingTeam.getSumSecondsSurvived()); // Kills per minute
+                    existingTeam.setKpm(existingTeam.getKills() / existingTeam.getSumSecondsSurvived());
                     // Merge gameList and corrections
                     existingTeam.getGameList().addAll(team.getGameList());
                     existingTeam.getCorrections().addAll(team.getCorrections());
                 } else {
-                    // Create a new team with the individual user
                     Team newTeam = new Team();
-                    //newTeam.setTeamId(team.getTeamId());
                     newTeam.setUsers(new ArrayList<>(List.of(user)));
                     newTeam.setKills(team.getKills());
-                    // newTeam.setCountedKills(team.getCountedKills());
                     newTeam.setGames(team.getGames());
-                    // newTeam.setCountedGames(team.getCountedGames());
                     newTeam.setWins(team.getWins());
-                    // newTeam.setCountedWins(team.getCountedWins());
-                    // newTeam.setPlacementScore(team.getPlacementScore());
-                    // newTeam.setEliminationScore(team.getEliminationScore());
-                    newTeam.setScore(team.getScore());
                     newTeam.setSumSecondsSurvived(team.getSumSecondsSurvived());
-                    // newTeam.setAveragePlacement(calculateAveragePlacement(team.getGameList()));
-                    // newTeam.setAverageSecondsSurvived(team.getSumSecondsSurvived() / team.getGames());
-                    // newTeam.setKpm(team.getKills() / team.getSumSecondsSurvived());
-                    newTeam.setGameList(new ArrayList<>(team.getGameList()));  // Copy gameList
-                    newTeam.setCorrections(new ArrayList<>(team.getCorrections()));  // Copy corrections
+                    newTeam.setGameList(new ArrayList<>(team.getGameList()));
+                    newTeam.setCorrections(new ArrayList<>(team.getCorrections()));
                     individualTeams.add(newTeam);
                 }
             }
