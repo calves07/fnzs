@@ -77,7 +77,6 @@ public class FnzsController {
         return resultingTeams;
     }
 
-    // todo: leaderboard está incompleto!!!!
     public static List<Team> splitAndMergeTeams(List<Team> teams) {
         List<Team> individualTeams = new ArrayList<>();
         for (Team team : teams) {
@@ -205,7 +204,8 @@ public class FnzsController {
         game.setPlacementScore(placementScore);
         game.setScore(eliminationScore + placementScore);
         if (initialScore != game.getScore()) {
-            System.out.println("DIFFERENT SCORE!!!!");
+            // todo: check this
+            System.out.println("DIFFERENT SCORE!!!!" + (game.getScore() - initialScore));
         }
     }
 }
