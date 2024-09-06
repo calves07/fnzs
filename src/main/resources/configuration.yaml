@@ -1,0 +1,6 @@
+mongo:
+  connectionString: mongodb+srv://catarrotulipa0m:X59sPX7beFE91tR6@cluster0.zwf7m2t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+  database: fortnite-v3
+  collectionAccounts: accounts
+  collectionProperties: properties
+  collectionMatches: matches
