@@ -97,25 +97,22 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
         private final TextField countedGamesField = new TextField("Counted Games");
         private final TextField placementScoreField = new TextField("Placement Score");
         private final TextField eliminationScoreField = new TextField("Elimination Score");
+        private final TextField epicIdField = new TextField("Epic ID");
+        private final TextField discordIdField = new TextField("Discord ID");
         private final VerticalLayout matches = new VerticalLayout();
 
         public TeamDetailsFormLayout() {
-            Stream.of(countedKillsField, countedWinsField, countedGamesField, placementScoreField, eliminationScoreField).forEach(field -> {
+            Stream.of(countedKillsField, countedWinsField, countedGamesField, placementScoreField, eliminationScoreField, epicIdField, discordIdField).forEach(field -> {
                 field.setReadOnly(true);
                 add(field);
             });
 
             setResponsiveSteps(
-                    new ResponsiveStep("0", 1),  // On very small screens, stack fields vertically (1 column)
-                    new ResponsiveStep("600px", 2),  // On slightly larger screens, use 2 columns
-                    new ResponsiveStep("900px", 3),  // On medium screens, use 3 columns
-                    new ResponsiveStep("1200px", 5)  // On large screens, use 5 columns
+                    new ResponsiveStep("0", 1),
+                    new ResponsiveStep("1200px", 7)
             );
-            //  setColspan(emailField, 3);
-            //  setColspan(phoneField, 3);
-            //  setColspan(streetField, 3);
+            add(matches);
         }
-
 
         public void setTeam(Team team) {
             countedKillsField.setValue(Integer.toString(team.getCountedKills()));
@@ -123,7 +120,9 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
             countedGamesField.setValue(Integer.toString(team.getCountedGames()));
             placementScoreField.setValue(String.format("%d (%.1f%%)", team.getPlacementScore(), (double) team.getPlacementScore() / team.getScore() * 100));
             eliminationScoreField.setValue(String.format("%d (%.1f%%)", team.getEliminationScore(), (double) team.getEliminationScore() / team.getScore() * 100));
-
+            epicIdField.setValue(team.getUsers().getFirst().getEpicId());
+            discordIdField.setValue(team.getUsers().getFirst().getDiscordId());
+    
             // Clear existing matches from the layout
             matches.removeAll();
 
@@ -139,7 +138,7 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
                 TextField timestampField = new TextField("Timestamp");
                 timestampField.setValue(game.getTimestamp().atZone(ZONE_ID).format(DATE_TIME_FORMATTER));
                 timestampField.setReadOnly(true);
-                timestampField.setMaxWidth(158, Unit.PIXELS);
+                timestampField.setMaxWidth(165, Unit.PIXELS);
 
                 TextField gameScoreField = new TextField("Score");
                 gameScoreField.setValue(Integer.toString(game.getScore()));
@@ -157,6 +156,7 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
                 killsField.setMaxWidth(50, Unit.PIXELS);
 
                 TextField placementField = new TextField("Placement");
+                // todo: fix to display number of teams instead of players
                 placementField.setValue(String.format("%d/%d", game.getPlacement(), game.getSession().getPlayers()));
                 placementField.setReadOnly(true);
                 placementField.setMaxWidth(83, Unit.PIXELS);
@@ -166,11 +166,6 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
 
                 // Add the game layout to the matches layout
                 matches.add(gameLayout);
-            }
-
-            // Add the matches layout to the form layout if not already added
-            if (!this.getChildren().anyMatch(component -> component.equals(matches))) {
-                add(matches);
             }
         }
     }
