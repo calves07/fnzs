@@ -133,7 +133,6 @@ public class FnzsController {
         return null;
     }
 
-    // todo: check match.status? SCORED/PARTIALLY_SCORED/NOT_SCORED
     private static void recalculateCountedStats(Tournament tournament, List<Team> teams) {
 
         int maxGamesScored = tournament.getMaxGamesScored();
@@ -146,9 +145,11 @@ public class FnzsController {
         for (Team team : teams) {
 
             List<Team.Game> copy = team.getGameList().stream().map(DeserializationUtils::createDeepCopy).toList();
-
             // We start by assuming every match counts (to reset whatever came from Yunite API)
             copy.forEach(x -> x.setCounts(true));
+
+            // We ignore matches that are not fully scored
+            copy.stream().filter(x -> !x.getSession().getStatus().equals(MatchSession.Status.SCORED)).forEach(x -> x.setCounts(false));
 
             // Games with fewer players that expected do not count
             copy.stream().filter(x -> x.getSession().getPlayers() < minPlayersInGame).forEach(x -> x.setCounts(false));
