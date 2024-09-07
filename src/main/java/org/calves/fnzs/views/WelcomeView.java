@@ -7,6 +7,7 @@ import com.vaadin.flow.router.RouterLink;
 import org.calves.fnzs.controller.FnzsController;
 import org.calves.yunite4j.dto.Tournament;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,6 +22,7 @@ public class WelcomeView extends VerticalLayout {
         add(welcomeMessage);
 
         List<Tournament> tournaments = FnzsController.getTournaments();
+        tournaments.sort((t1, t2) -> t2.getStartDate().compareTo(t1.getStartDate()));
 
         // Create a layout to display tournament links
         VerticalLayout tournamentLayout = new VerticalLayout();
