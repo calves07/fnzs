@@ -57,7 +57,7 @@
         <dependency>
             <groupId>org.calves</groupId>
             <artifactId>yunite4j</artifactId>
-            <version>1.4.4</version>
+            <version>1.4.6</version>
         </dependency>
         <dependency>
             <groupId>org.calves</groupId>

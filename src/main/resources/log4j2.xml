@@ -23,6 +23,11 @@
     </Appenders>
 
     <Loggers>
+        <!-- Specific logger for MongoDB driver -->
+        <Logger name="org.mongodb.driver" level="WARN" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
         <Root level="ALL">
             <AppenderRef ref="ConsoleAppender"/>
             <AppenderRef ref="RollingFileAppender"/>

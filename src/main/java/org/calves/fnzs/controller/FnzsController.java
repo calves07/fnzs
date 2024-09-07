@@ -74,7 +74,7 @@ public class FnzsController {
         LOGGER.debug("Finished splitting and merging leaderboard for individual rankings");
 
         // Then we sort team members by score and set placements accordingly
-        sortAndSetPlacement(resultingTeams);
+        sortAndSetPlacement(tournament.getTiebreakers(), resultingTeams);
         LOGGER.debug("Finished sorting leaderboard");
 
         return resultingTeams;
@@ -174,22 +174,38 @@ public class FnzsController {
         }
     }
 
-    // todo: apply tie breakers. is it worth tho? easy to do fixed order but if we are going to make this dynamic to respect yunite configuration, it adds complexity
-    private static void sortAndSetPlacement(List<Team> teams) {
-        // Sort teams by score in descending order
-        teams.sort(Comparator.comparingInt(Team::getScore).reversed());
+    private static void sortAndSetPlacement(List<Tournament.TieBreaker> tieBreakers, List<Team> teams) {
 
+        Comparator<Team> comparator = Comparator.comparingInt(Team::getScore).reversed(); // Primary sort by score (descending)
+        for (Tournament.TieBreaker tieBreaker : tieBreakers) {
+            comparator = switch (tieBreaker) {
+                case WINS -> comparator.thenComparing(Team::getWins, Comparator.reverseOrder()); // Higher wins first
+                case AVERAGE_ELIMINATIONS ->
+                        comparator.thenComparing(team -> (double) team.getKills() / team.getGameList().size(), Comparator.reverseOrder()); // Higher average eliminations first
+                case SUM_ELIMINATIONS ->
+                        comparator.thenComparing(Team::getKills, Comparator.reverseOrder()); // Higher sum eliminations first
+                case AVERAGE_PLACEMENT ->
+                        comparator.thenComparing(Team::getAveragePlacement); // Lower average placement first
+                case SCORE_PER_MATCH ->
+                        comparator.thenComparing(team -> (double) team.getScore() / team.getGameList().size(), Comparator.reverseOrder()); // Higher score per match first
+                case SUM_TIME_SURVIVED ->
+                        comparator.thenComparing(Team::getSumSecondsSurvived, Comparator.reverseOrder()); // Higher sum time survived first
+                case AVERAGE_TIME_SURVIVED ->
+                        comparator.thenComparing(Team::getAverageSecondsSurvived, Comparator.reverseOrder()); // Higher average time survived first
+            };
+        }
+
+        // Sort using the dynamic comparator
+        teams.sort(comparator);
+
+        // Assign placements
         int currentPlacement = 1;
-
         for (int i = 0; i < teams.size(); i++) {
-            // For the first team, or if the current team's score is different from the previous team
-            if (i == 0 || teams.get(i).getScore() != teams.get(i - 1).getScore()) {
+            if (i == 0 || comparator.compare(teams.get(i), teams.get(i - 1)) != 0) {
                 teams.get(i).setPlacement(currentPlacement);
             } else {
-                // If the current team has the same score as the previous team, give them the same placement
                 teams.get(i).setPlacement(teams.get(i - 1).getPlacement());
             }
-            // Increment the placement counter only when moving to the next unique rank
             currentPlacement++;
         }
     }
