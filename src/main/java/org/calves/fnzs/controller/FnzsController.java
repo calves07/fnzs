@@ -100,13 +100,13 @@ public class FnzsController {
                     existingTeam.setGames(existingTeam.getGames() + team.getGames());
                     existingTeam.setWins(existingTeam.getWins() + team.getWins());
                     existingTeam.setSumSecondsSurvived(existingTeam.getSumSecondsSurvived() + team.getSumSecondsSurvived());
+                    // Merge gameList and corrections
+                    existingTeam.getGameList().addAll(team.getGameList());
+                    existingTeam.getCorrections().addAll(team.getCorrections());
                     // Recalculate averages
                     existingTeam.setAveragePlacement(calculateAveragePlacement(existingTeam.getGameList()));
                     existingTeam.setAverageSecondsSurvived(existingTeam.getSumSecondsSurvived() / existingTeam.getGames());
                     existingTeam.setKpm(existingTeam.getKills() / existingTeam.getSumSecondsSurvived() * 60);
-                    // Merge gameList and corrections
-                    existingTeam.getGameList().addAll(team.getGameList());
-                    existingTeam.getCorrections().addAll(team.getCorrections());
                 } else {
                     Team newTeam = new Team();
                     newTeam.setUsers(new ArrayList<>(List.of(user)));
@@ -116,6 +116,9 @@ public class FnzsController {
                     newTeam.setSumSecondsSurvived(team.getSumSecondsSurvived());
                     newTeam.setGameList(new ArrayList<>(team.getGameList()));
                     newTeam.setCorrections(new ArrayList<>(team.getCorrections()));
+                    newTeam.setAveragePlacement(calculateAveragePlacement(team.getGameList()));
+                    newTeam.setAverageSecondsSurvived(team.getSumSecondsSurvived() / team.getGames());
+                    newTeam.setKpm(team.getKills() / team.getSumSecondsSurvived() * 60);
                     individualTeams.add(newTeam);
                 }
             }
