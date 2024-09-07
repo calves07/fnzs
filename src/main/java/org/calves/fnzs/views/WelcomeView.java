@@ -1,13 +1,14 @@
 package org.calves.fnzs.views;
 
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.calves.fnzs.controller.FnzsController;
 import org.calves.yunite4j.dto.Tournament;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,8 +19,18 @@ public class WelcomeView extends VerticalLayout {
 
     public WelcomeView() {
 
-        H1 welcomeMessage = new H1("Welcome!");
-        add(welcomeMessage);
+        getElement().executeJs("document.documentElement.setAttribute('theme', $0)", Lumo.DARK);
+
+        H1 welcomeMessage = new H1("Tournaments by z3rgtv!");
+
+        String twitchEmbedCode = "<iframe "
+                + "src=\"https://player.twitch.tv/?channel=z3rgtv&parent=zergttv.pt&parent=localhost\" "
+                + "height=\"400\" "
+                + "layout=\"video-with-chat\" "
+                + "width=\"95%\" "
+                + "muted=\"true\" "
+                + "</iframe>";
+        Html twitchEmbed = new Html(twitchEmbedCode);
 
         List<Tournament> tournaments = FnzsController.getTournaments();
         tournaments.sort((t1, t2) -> t2.getStartDate().compareTo(t1.getStartDate()));
@@ -37,6 +48,6 @@ public class WelcomeView extends VerticalLayout {
         }
 
         // Add components to the layout
-        add(welcomeMessage, tournamentLayout);
+        add(welcomeMessage, twitchEmbed, tournamentLayout);
     }
 }

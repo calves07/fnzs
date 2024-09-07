@@ -1,6 +1,7 @@
 package org.calves.fnzs.views;
 
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -13,6 +14,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.Lumo;
+import com.vaadin.flow.theme.material.Material;
 import org.calves.fnzs.controller.FnzsController;
 import org.calves.yunite4j.dto.Team;
 import org.calves.yunite4j.dto.Tournament;
@@ -39,6 +42,9 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
     private List<Team> leaderboard = new ArrayList<>();
 
     public IndividualLeaderboardView() {
+
+        getElement().executeJs("document.documentElement.setAttribute('theme', $0)", Lumo.DARK);
+
         grid.addColumn(Team::getPlacement).setHeader("Rank");
         grid.addColumn(team -> team.getUsers().getFirst().getEpicUsername()).setHeader("Player");
         grid.addColumn(Team::getScore).setHeader("Score");
@@ -47,7 +53,6 @@ public class IndividualLeaderboardView extends VerticalLayout implements HasUrlP
         grid.addColumn(Team::getWins).setHeader("Wins");
         grid.addColumn(team -> MathUtils.roundToDecimalPlaces(team.getAveragePlacement(), 1)).setHeader("Average Placement");
         grid.addColumn(team -> MathUtils.roundToDecimalPlaces(team.getAverageSecondsSurvived() / 60, 1)).setHeader("Average Minutes Survived");
-
 
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
