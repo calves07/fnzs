@@ -24,7 +24,7 @@ public class WelcomeView extends VerticalLayout {
         H1 welcomeMessage = new H1("Tournaments by z3rgtv!");
 
         String twitchEmbedCode = "<iframe "
-                + "src=\"https://player.twitch.tv/?channel=z3rgtv&parent=zergttv.pt&parent=www.zergttv.pt&parent=localhost\" "
+                + "src=\"https://player.twitch.tv/?channel=z3rgtv&parent=zergttv.pt&parent=www.zergttv.pt&parent=localhost&parent=fnzs-d3ddd7666fef.herokuapp.com\" "
                 + "height=\"400\" "
                 + "layout=\"video-with-chat\" "
                 + "width=\"95%\" "
