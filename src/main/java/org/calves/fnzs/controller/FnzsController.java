@@ -29,6 +29,7 @@ public class FnzsController {
     private static final Logger LOGGER = LogManager.getLogger(FnzsController.class);
     private static final String DEFAULT_GUILD_ID = "1213253795333541960";
     private static final HashMap<String, List<SessionLeaderboard>> SESSIONS_LEADERBOARD = new HashMap<>();
+    private static final HashMap<String, String> USERNAME_MAPS = new HashMap<>();
 
     public static List<Tournament> getTournaments() {
         LOGGER.info("Retrieving tournaments");
@@ -57,16 +58,15 @@ public class FnzsController {
 
         teams.parallelStream().forEach(team -> {
             team.getUsers().parallelStream().forEach(user -> {
-                Account account = Account.builder().username(String.format("Unknown(%s)", user.getEpicId())).build();
-                try {
-                    account = MongoDbController.getAccount(user.getEpicId());
-                } catch (Exception ex) {
-                    System.out.println();
+                String username = USERNAME_MAPS.get(user.getEpicId());
+                if (username == null) {
+                    Account account = AccountsController.insertAccountWithId(user.getEpicId(), null, null);
+                    username = account.getUsername();
+                    if (username == null) {
+                        username = String.format("Unknown(%s)", user.getEpicId());
+                    }
                 }
-                if (account == null) {
-                    account = AccountsController.insertAccountWithId(user.getEpicId(), null, null);
-                }
-                user.setEpicUsername(account.getUsername());
+                user.setEpicUsername(username);
             });
         });
 
@@ -88,6 +88,15 @@ public class FnzsController {
         LOGGER.info(Duration.between(start, end));
 
         return resultingTeams;
+    }
+
+    public static void loadUsernames() {
+        LOGGER.debug("Loading usernames");
+        USERNAME_MAPS.clear();
+        MongoDbController.getAccountsIdsAndNames().parallelStream().forEach(x -> {
+            USERNAME_MAPS.put(x.getId(), x.getUsername());
+        });
+        LOGGER.debug("Loaded {} usernames", USERNAME_MAPS.size());
     }
 
     public static int getTeamsInMatch(String sessionId) {
