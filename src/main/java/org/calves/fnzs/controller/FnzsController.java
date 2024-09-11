@@ -61,7 +61,9 @@ public class FnzsController {
                 String username = USERNAME_MAPS.get(user.getEpicId());
                 if (username == null) {
                     Account account = AccountsController.insertAccountWithId(user.getEpicId(), null, null);
-                    username = account.getUsername();
+                    if (account != null) {
+                        username = account.getUsername();
+                    }
                     if (username == null) {
                         username = String.format("Unknown(%s)", user.getEpicId());
                     }
