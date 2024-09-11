@@ -13,6 +13,8 @@ import org.calves.yunite4j.dto.Team;
 import org.calves.yunite4j.dto.Tournament;
 import org.calves.yunite4j.utils.DeserializationUtils;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,14 +46,17 @@ public class FnzsController {
 
     public static List<Team> getTournamentLeaderboard(Tournament tournament) {
 
+        Instant start = Instant.now();
+
         LOGGER.info("Retrieving leaderboard from tournament {}", tournament.getId());
         List<Team> teams = API.getTournamentLeaderboard(DEFAULT_GUILD_ID, tournament.getId());
         LOGGER.info("Retrieved a total of {} teams", teams.size());
 
         // First we enrich data with Epic usernames
         LOGGER.info("Enriching data Epic usernames");
-        for (Team team : teams) {
-            for (Team.User user : team.getUsers()) {
+
+        teams.parallelStream().forEach(team -> {
+            team.getUsers().parallelStream().forEach(user -> {
                 Account account = Account.builder().username(String.format("Unknown(%s)", user.getEpicId())).build();
                 try {
                     account = MongoDbController.getAccount(user.getEpicId());
@@ -62,8 +67,10 @@ public class FnzsController {
                     account = AccountsController.insertAccountWithId(user.getEpicId(), null, null);
                 }
                 user.setEpicUsername(account.getUsername());
-            }
-        }
+            });
+        });
+
+        LOGGER.info("Finished enriching data Epic usernames");
 
         // Then we enrich games data
         enrichTournamentMatches(tournament, API.getTournamentMatches(DEFAULT_GUILD_ID, tournament.getId()), teams);
@@ -71,11 +78,14 @@ public class FnzsController {
         // Then we split team members (while merging member data to make sure the totals and averages are still correct)
         List<Team> resultingTeams = splitAndMergeTeams(teams);
         recalculateCountedStats(tournament, resultingTeams);
-        LOGGER.debug("Finished splitting and merging leaderboard for individual rankings");
+        LOGGER.info("Finished splitting and merging leaderboard for individual rankings");
 
         // Then we sort team members by score and set placements accordingly
         sortAndSetPlacement(tournament.getTiebreakers(), resultingTeams);
-        LOGGER.debug("Finished sorting leaderboard");
+        LOGGER.info("Finished sorting leaderboard");
+
+        Instant end = Instant.now();
+        LOGGER.info(Duration.between(start, end));
 
         return resultingTeams;
     }
