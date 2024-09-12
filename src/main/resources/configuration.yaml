@@ -4,3 +4,52 @@ mongo:
   collectionAccounts: accounts
   collectionProperties: properties
   collectionMatches: matches
+
+discord:
+  enabled: true
+  webhookImportant: https://discord.com/api/webhooks/1245314956170100746/b8yaDKaWrYWcSC63xb9l9CO-btr3VG7vCihj0gtmawzsU3WwF0wz-54TZkGUGvXW1x7B
+  webhookRankUpdates: https://discord.com/api/webhooks/1245315258441007216/wX2hIuOTR_eoWvjkPqNAlYMmDlvEF1BdOkPvf_UpSyFqMjFlhrrOWIjzTseqW5YHWrQR
+
+osirion:
+  baseEndpoint: https://api.osirion.gg/fortnite/v1/
+  apiKey: dde2d624-a901-4f12-a54b-865af36d1811
+  epicIds: 834889f6dc6b44af9bac23e96f24ef99
+
+epicGames:
+  accountId: 834889f6dc6b44af9bac23e96f24ef99
+  deviceId: dc5766a9594a4d368d4a19698dd74c70
+  secret: NHVIQEBRUJNFOGSSM54AMQ7Y7SYJX2XI
+  tierOneFriends:
+    - 81c3c71dc17640dfaf7497a8d4c3ae57 # Bruna
+    - 30314e7112794cf9b86b944cc397d125 # Sandy
+    - 781729acf6e9415ab9fc97ad7a0a196e # Bruno
+    - 7377d0d32da14ee587b17e37a3000daf # Samu
+    - b0b4bdeb0c2f43fda3bff023e399395e # Daniela
+    - b7400829b733458f87af731b3d4f531d # Libras
+    - e03c4c39c31149b7a067fbd87d71a17c # Libras (Cota)
+    - 9221f9100dbf4fdd8f8b1a68250abae8 # Johnny
+  acquainted:
+    - ff01ce6ce63741d8ab970d41d4129f63 # Dayannah
+    - 8faa2de409cf4a77970e184b80be7dc2 # Demon0fDoom
+    - cdff80d9282e48318f896919bdaa8a72 # Bosingwa
+    - bf0a2641faf74f67bb436db8f041b518 # Mermaid
+    - 67232a1b08f44e61897326d958d9408f # Fredy
+    - a454137be5ad4f29a817cb1249b9a245 # PauloxP69
+    - 1eeedfb7bbdc43a7bf1cfccee9dd269a # Fragger Sandro
+    - 3318bc76e2504fcfaed9956a8b22eab0 # xtr3me_ly
+    - b80078bb1b4f49b89eb8436e1f83d133 # General Arafat
+    - c687392d1bcc4db9920ed78090aad0c3 # Silva (do Toni)
+    - 8d8291d0f3114f3097445fcbbfe0220c # WDWPP
+    - 94bd012a0a4d414cbc119f070724d583 # Winnow
+    - bcf58d5ae8014052a2b619c8a8fae112 # Soninha19
+
+cache:
+  enabled: false
+  location: C:\\Cache\\fortnite-v3
+  size: 100
+
+prometheus:
+  enabled: false
+  port: 9091
+  binary: C:\\Tools\\Prometheus 2.45.2\\prometheus.exe
+  configuration: C:\\Tools\\Prometheus 2.45.2\\prometheus.yml
